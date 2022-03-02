@@ -1,0 +1,537 @@
+---
+title: "Sorghum Analysis"
+author: "DMAS"
+date: "07/02/2021"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Sorghum
+
+
+
+```{r packages, echo=FALSE}
+
+# Libraries
+#install.packages("tidyverse")
+suppressMessages(suppressWarnings(library(tidyverse)))
+suppressMessages(suppressWarnings(library(openxlsx)))
+suppressMessages(suppressWarnings(library(readxl)))
+suppressMessages(suppressWarnings(library(summarytools)))
+suppressMessages(suppressWarnings(library(cowplot)))
+suppressMessages(suppressWarnings(library(DT)))
+suppressMessages(suppressWarnings(library(downloadthis)))
+suppressMessages(suppressWarnings(library(lmerTest)))
+suppressMessages(suppressWarnings(library(lme4)))
+suppressMessages(suppressWarnings(library(multcomp)))
+suppressMessages(suppressWarnings(library(arm)))
+suppressMessages(suppressWarnings(library(gridExtra)))
+suppressMessages(suppressWarnings(library(Lahman)))
+suppressMessages(suppressWarnings(library(emmeans)))
+suppressMessages(suppressWarnings(library(car)))
+suppressMessages(suppressWarnings(library(metan)))
+```
+
+
+## Multi Site ASHT
+
+
+```{r, echo=FALSE, fig.height = 8, fig.width = 12}
+# Data
+sorg1 <- read_excel('C:/Users/NTANDO/Downloads/ICRISAT 2020 Data sets/Sorghum Data Sets 2020/Multi Site ASHT.xlsx',
+                      sheet = 1)
+
+
+
+sorg1$REP_NO <- as.factor(sorg1$REP_NO)
+sorg1$Site <- as.factor(sorg1$Site)
+sorg1$BLOCK_NO <- as.factor(sorg1$BLOCK_NO)
+
+ggplot(sorg1, aes(Site, `GHvYld_M (t/ha)`, fill = Site)) + geom_boxplot() + geom_jitter() +
+  theme_bw()
+
+
+
+
+# model 
+
+#model10 <- lmer(`GHvYld_M (t/ha)` ~ REP_NO + (1| DESIGNATION) + (1| REP_NO:BLOCK_NO) + (1| Site), data = sorg1)
+#model10b <- lm(`GHvYld_M (t/ha)` ~ DESIGNATION + REP_NO, data = sorg1)
+#anova(model10)
+#summary(model10)
+
+
+
+#par(mfrow = c(2, 2))
+#hist((residuals(model10)), col = "darkgreen", xlab = "Residual", main = "Histogram of Residuals")
+#qqnorm(residuals(model10)); qqline(residuals(model10))
+#plot(fitted(model10), residuals(model10))
+#plot(cooks.distance(model10))
+
+
+
+a <- anova_ind(sorg1, Site, DESIGNATION, REP_NO, block= BLOCK_NO, `GHvYld_M (t/ha)`)
+
+
+
+b <- as.data.frame.list(a)
+b %>%
+    datatable(extensions = 'Buttons',
+            options = list(dom = 'lfrtipB',
+                           buttons = c('copy', 'csv', 'excel', 'pdf', 'print'),
+                           lengthMenu = list(c(10,25,50,-1),
+                                             c(10,25,50,"All"))))
+
+# Multi Site ANalysis
+# Fixed Effects
+w <- anova_joint(sorg1, Site, DESIGNATION, REP_NO, block=BLOCK_NO, `GHvYld_M (t/ha)`)
+w
+gmd(w, "details")
+gmd(w, "h2")
+#plot(w, na.rm=FALSE)
+
+
+# Mixed Effects
+s <- gamem_met(sorg1, Site, DESIGNATION, REP_NO, block = BLOCK_NO, `GHvYld_M (t/ha)`)
+s
+get_model_data(s, "genpar")
+plot(s)
+
+
+# AMMI
+#j <- performs_ammi(sorg1, Site, DESIGNATION, REP_NO, `GHvYld_M (t/ha)`)
+#plot(j, which=c(1,2))
+#plot_scores(j)
+#plot_scores(j, type=2)
+
+# GxE
+m <- gge(sorg1, Site, DESIGNATION, `GHvYld_M (t/ha)`, centering = "environment")
+plot(m)
+plot(m, type = 3)
+plot(m, type = 8)
+
+
+
+```
+
+
+
+## Multi Site ASVT DL
+
+
+```{r, echo=FALSE, fig.height = 8, fig.width = 12}
+# Data
+sorg1 <- read_excel('C:/Users/NTANDO/Downloads/ICRISAT 2020 Data sets/Sorghum Data Sets 2020/Multi Site ASVT DL.xlsx',
+                      sheet = 1)
+
+
+
+sorg1$REP_NO <- as.factor(sorg1$REP_NO)
+sorg1$Site <- as.factor(sorg1$Site)
+sorg1$BLOCK_NO <- as.factor(sorg1$BLOCK_NO)
+
+ggplot(sorg1, aes(Site, GDMYld_C_tHa, fill = Site)) + geom_boxplot() + geom_jitter() +
+  theme_bw()
+
+
+
+
+# model 
+
+#model10 <- lmer(`GHvYld_M (t/ha)` ~ REP_NO + (1| DESIGNATION) + (1| REP_NO:BLOCK_NO) + (1| Site), data = sorg1)
+#model10b <- lm(`GHvYld_M (t/ha)` ~ DESIGNATION + REP_NO, data = sorg1)
+#anova(model10)
+#summary(model10)
+
+
+
+#par(mfrow = c(2, 2))
+#hist((residuals(model10)), col = "darkgreen", xlab = "Residual", main = "Histogram of Residuals")
+#qqnorm(residuals(model10)); qqline(residuals(model10))
+#plot(fitted(model10), residuals(model10))
+#plot(cooks.distance(model10))
+
+
+
+a <- anova_ind(sorg1, Site, DESIGNATION, REP_NO, block= BLOCK_NO, GDMYld_C_tHa)
+
+
+
+b <- as.data.frame.list(a)
+b %>%
+    datatable(extensions = 'Buttons',
+            options = list(dom = 'lfrtipB',
+                           buttons = c('copy', 'csv', 'excel', 'pdf', 'print'),
+                           lengthMenu = list(c(10,25,50,-1),
+                                             c(10,25,50,"All"))))
+
+# Multi Site ANalysis
+# Fixed Effects
+w <- anova_joint(sorg1, Site, DESIGNATION, REP_NO, block=BLOCK_NO, GDMYld_C_tHa)
+w
+gmd(w, "details")
+gmd(w, "h2")
+#plot(w, na.rm=FALSE)
+
+
+# Mixed Effects
+s <- gamem_met(sorg1, Site, DESIGNATION, REP_NO, block = BLOCK_NO, GDMYld_C_tHa)
+s
+get_model_data(s, "genpar")
+plot(s)
+
+
+# AMMI
+#j <- performs_ammi(sorg1, Site, DESIGNATION, REP_NO, `GHvYld_M (t/ha)`)
+#plot(j, which=c(1,2))
+#plot_scores(j)
+#plot_scores(j, type=2)
+
+# GxE
+m <- gge(sorg1, Site, DESIGNATION, GDMYld_C_tHa, centering = "environment")
+plot(m)
+plot(m, type = 3)
+plot(m, type = 8)
+
+
+
+```
+
+
+
+
+## Multi Site ASVT DT
+
+
+
+```{r, echo=FALSE, fig.height = 8, fig.width = 12}
+# Data
+sorg1 <- read_excel('C:/Users/NTANDO/Downloads/ICRISAT 2020 Data sets/Sorghum Data Sets 2020/Multi Site ASVT DT.xlsx',
+                      sheet = 1)
+
+
+
+sorg1$REP_NO <- as.factor(sorg1$REP_NO)
+sorg1$Site <- as.factor(sorg1$Site)
+sorg1$BLOCK_NO <- as.factor(sorg1$BLOCK_NO)
+
+ggplot(sorg1, aes(Site, GHvYld_M_tHa, fill = Site)) + geom_boxplot() + geom_jitter() +
+  theme_bw()
+
+
+
+
+# model 
+
+#model10 <- lmer(`GHvYld_M (t/ha)` ~ REP_NO + (1| DESIGNATION) + (1| REP_NO:BLOCK_NO) + (1| Site), data = sorg1)
+#model10b <- lm(`GHvYld_M (t/ha)` ~ DESIGNATION + REP_NO, data = sorg1)
+#anova(model10)
+#summary(model10)
+
+
+
+#par(mfrow = c(2, 2))
+#hist((residuals(model10)), col = "darkgreen", xlab = "Residual", main = "Histogram of Residuals")
+#qqnorm(residuals(model10)); qqline(residuals(model10))
+#plot(fitted(model10), residuals(model10))
+#plot(cooks.distance(model10))
+
+
+
+a <- anova_ind(sorg1, Site, DESIGNATION, REP_NO, block= BLOCK_NO, GHvYld_M_tHa)
+
+
+
+b <- as.data.frame.list(a)
+b %>%
+    datatable(extensions = 'Buttons',
+            options = list(dom = 'lfrtipB',
+                           buttons = c('copy', 'csv', 'excel', 'pdf', 'print'),
+                           lengthMenu = list(c(10,25,50,-1),
+                                             c(10,25,50,"All"))))
+
+# Multi Site ANalysis
+# Fixed Effects
+w <- anova_joint(sorg1, Site, DESIGNATION, REP_NO, block=BLOCK_NO, GHvYld_M_tHa)
+w
+gmd(w, "details")
+gmd(w, "h2")
+#plot(w, na.rm=FALSE)
+
+
+# Mixed Effects
+s <- gamem_met(sorg1, Site, DESIGNATION, REP_NO, block = BLOCK_NO, GHvYld_M_tHa)
+s
+get_model_data(s, "genpar")
+plot(s)
+
+
+# AMMI
+#j <- performs_ammi(sorg1, Site, DESIGNATION, REP_NO, `GHvYld_M (t/ha)`)
+#plot(j, which=c(1,2))
+#plot_scores(j)
+#plot_scores(j, type=2)
+
+# GxE
+m <- gge(sorg1, Site, DESIGNATION, GHvYld_M_tHa, centering = "environment")
+plot(m)
+plot(m, type = 3)
+plot(m, type = 8)
+
+
+
+```
+
+
+
+## Multi Site ADVANCED SORGHUM VARIETY YIELD TRIAL SUB HUMIDS
+
+
+```{r, echo=FALSE, fig.height = 8, fig.width = 12}
+# Data
+sorg1 <- read_excel('C:/Users/NTANDO/Downloads/ICRISAT 2020 Data sets/Sorghum Data Sets 2020/Multi Site ADVANCED SORGHUM VARIETY YIELD TRIAL SUB HUMIDS.xlsx',
+                      sheet = 1)
+
+
+
+sorg1$REP_NO <- as.factor(sorg1$REP_NO)
+sorg1$Site <- as.factor(sorg1$Site)
+sorg1$BLOCK_NO <- as.factor(sorg1$BLOCK_NO)
+
+ggplot(sorg1, aes(Site, GHvYld_M_tHa, fill = Site)) + geom_boxplot() + geom_jitter() +
+  theme_bw()
+
+
+
+
+# model 
+
+#model10 <- lmer(`GHvYld_M (t/ha)` ~ REP_NO + (1| DESIGNATION) + (1| REP_NO:BLOCK_NO) + (1| Site), data = sorg1)
+#model10b <- lm(`GHvYld_M (t/ha)` ~ DESIGNATION + REP_NO, data = sorg1)
+#anova(model10)
+#summary(model10)
+
+
+
+#par(mfrow = c(2, 2))
+#hist((residuals(model10)), col = "darkgreen", xlab = "Residual", main = "Histogram of Residuals")
+#qqnorm(residuals(model10)); qqline(residuals(model10))
+#plot(fitted(model10), residuals(model10))
+#plot(cooks.distance(model10))
+
+
+
+a <- anova_ind(sorg1, Site, DESIGNATION, REP_NO, block= BLOCK_NO, GHvYld_M_tHa)
+
+
+
+b <- as.data.frame.list(a)
+b %>%
+    datatable(extensions = 'Buttons',
+            options = list(dom = 'lfrtipB',
+                           buttons = c('copy', 'csv', 'excel', 'pdf', 'print'),
+                           lengthMenu = list(c(10,25,50,-1),
+                                             c(10,25,50,"All"))))
+
+# Multi Site ANalysis
+# Fixed Effects
+w <- anova_joint(sorg1, Site, DESIGNATION, REP_NO, block=BLOCK_NO, GHvYld_M_tHa)
+w
+gmd(w, "details")
+gmd(w, "h2")
+#plot(w, na.rm=FALSE)
+
+
+# Mixed Effects
+s <- gamem_met(sorg1, Site, DESIGNATION, REP_NO, block = BLOCK_NO, GHvYld_M_tHa)
+s
+get_model_data(s, "genpar")
+plot(s)
+
+
+# AMMI
+#j <- performs_ammi(sorg1, Site, DESIGNATION, REP_NO, `GHvYld_M (t/ha)`)
+#plot(j, which=c(1,2))
+#plot_scores(j)
+#plot_scores(j, type=2)
+
+# GxE
+m <- gge(sorg1, Site, DESIGNATION, GHvYld_M_tHa, centering = "environment")
+plot(m)
+plot(m, type = 3)
+plot(m, type = 8)
+
+
+
+```
+
+
+## Multi Site FORAGE SORGHUM PRELIMINARY YIELD TRIAL
+
+
+```{r, echo=FALSE, fig.height = 8, fig.width = 12}
+# Data
+sorg1 <- read_excel('C:/Users/NTANDO/Downloads/ICRISAT 2020 Data sets/Sorghum Data Sets 2020/Multi Site SPYT FORAGE.xlsx',
+                      sheet = 1)
+
+
+
+sorg1$REP_NO <- as.factor(sorg1$REP_NO)
+sorg1$Site <- as.factor(sorg1$Site)
+sorg1$BLOCK_NO <- as.factor(sorg1$BLOCK_NO)
+
+ggplot(sorg1, aes(Site, `GHvYld_M_t/ha`, fill = Site)) + geom_boxplot() + geom_jitter() +
+  theme_bw()
+
+
+
+
+# model 
+
+#model10 <- lmer(`GHvYld_M (t/ha)` ~ REP_NO + (1| DESIGNATION) + (1| REP_NO:BLOCK_NO) + (1| Site), data = sorg1)
+#model10b <- lm(`GHvYld_M (t/ha)` ~ DESIGNATION + REP_NO, data = sorg1)
+#anova(model10)
+#summary(model10)
+
+
+
+#par(mfrow = c(2, 2))
+#hist((residuals(model10)), col = "darkgreen", xlab = "Residual", main = "Histogram of Residuals")
+#qqnorm(residuals(model10)); qqline(residuals(model10))
+#plot(fitted(model10), residuals(model10))
+#plot(cooks.distance(model10))
+
+
+
+a <- anova_ind(sorg1, Site, DESIGNATION, REP_NO, block= BLOCK_NO, `GHvYld_M_t/ha`)
+
+
+
+b <- as.data.frame.list(a)
+b %>%
+    datatable(extensions = 'Buttons',
+            options = list(dom = 'lfrtipB',
+                           buttons = c('copy', 'csv', 'excel', 'pdf', 'print'),
+                           lengthMenu = list(c(10,25,50,-1),
+                                             c(10,25,50,"All"))))
+
+# Multi Site ANalysis
+# Fixed Effects
+w <- anova_joint(sorg1, Site, DESIGNATION, REP_NO, block=BLOCK_NO, `GHvYld_M_t/ha`)
+w
+gmd(w, "details")
+gmd(w, "h2")
+#plot(w, na.rm=FALSE)
+
+
+# Mixed Effects
+s <- gamem_met(sorg1, Site, DESIGNATION, REP_NO, block = BLOCK_NO, `GHvYld_M_t/ha`)
+s
+get_model_data(s, "genpar")
+plot(s)
+
+
+# AMMI
+#j <- performs_ammi(sorg1, Site, DESIGNATION, REP_NO, `GHvYld_M (t/ha)`)
+#plot(j, which=c(1,2))
+#plot_scores(j)
+#plot_scores(j, type=2)
+
+# GxE
+m <- gge(sorg1, Site, DESIGNATION, `GHvYld_M_t/ha`, centering = "environment")
+plot(m)
+plot(m, type = 3)
+plot(m, type = 8)
+
+
+
+```
+
+
+
+## Multi Site SORGHUM PRELIMINARY YIELD TRIAL GQ
+
+
+```{r, echo=FALSE, fig.height = 8, fig.width = 12}
+# Data
+sorg1 <- read_excel('C:/Users/NTANDO/Downloads/ICRISAT 2020 Data sets/Sorghum Data Sets 2020/Multi Site SPYT GQ.xlsx',
+                      sheet = 1)
+
+
+
+sorg1$REP_NO <- as.factor(sorg1$REP_NO)
+sorg1$Site <- as.factor(sorg1$Site)
+sorg1$BLOCK_NO <- as.factor(sorg1$BLOCK_NO)
+
+ggplot(sorg1, aes(Site, `GDMYld_C_t/Ha`, fill = Site)) + geom_boxplot() + geom_jitter() +
+  theme_bw()
+
+
+
+
+# model 
+
+#model10 <- lmer(`GHvYld_M (t/ha)` ~ REP_NO + (1| DESIGNATION) + (1| REP_NO:BLOCK_NO) + (1| Site), data = sorg1)
+#model10b <- lm(`GHvYld_M (t/ha)` ~ DESIGNATION + REP_NO, data = sorg1)
+#anova(model10)
+#summary(model10)
+
+
+
+#par(mfrow = c(2, 2))
+#hist((residuals(model10)), col = "darkgreen", xlab = "Residual", main = "Histogram of Residuals")
+#qqnorm(residuals(model10)); qqline(residuals(model10))
+#plot(fitted(model10), residuals(model10))
+#plot(cooks.distance(model10))
+
+
+
+a <- anova_ind(sorg1, Site, DESIGNATION, REP_NO, block= BLOCK_NO, `GDMYld_C_t/Ha`)
+
+
+
+b <- as.data.frame.list(a)
+b %>%
+    datatable(extensions = 'Buttons',
+            options = list(dom = 'lfrtipB',
+                           buttons = c('copy', 'csv', 'excel', 'pdf', 'print'),
+                           lengthMenu = list(c(10,25,50,-1),
+                                             c(10,25,50,"All"))))
+
+# Multi Site ANalysis
+# Fixed Effects
+w <- anova_joint(sorg1, Site, DESIGNATION, REP_NO, block=BLOCK_NO, `GDMYld_C_t/Ha`)
+w
+gmd(w, "details")
+gmd(w, "h2")
+#plot(w, na.rm=FALSE)
+
+
+# Mixed Effects
+s <- gamem_met(sorg1, Site, DESIGNATION, REP_NO, block = BLOCK_NO, `GDMYld_C_t/Ha`)
+s
+get_model_data(s, "genpar")
+plot(s)
+
+
+# AMMI
+#j <- performs_ammi(sorg1, Site, DESIGNATION, REP_NO, `GHvYld_M (t/ha)`)
+#plot(j, which=c(1,2))
+#plot_scores(j)
+#plot_scores(j, type=2)
+
+# GxE
+m <- gge(sorg1, Site, DESIGNATION, `GDMYld_C_t/Ha`, centering = "environment")
+plot(m)
+plot(m, type = 3)
+plot(m, type = 8)
+
+
+
+```
